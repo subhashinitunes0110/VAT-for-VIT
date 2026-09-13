@@ -1,8 +1,6 @@
 from fastapi import FastAPI
 
 from backend.app.models.concept import AnalyzeRequest, ConceptAnalysis
-from backend.app.models.visualization import VisualizationData
-
 from backend.app.services.semantic_analyzer import analyze_concept
 from backend.app.services.visualization_service import create_visualization_data
 
@@ -31,10 +29,15 @@ def health():
 
 @app.post("/analyze", response_model=ConceptAnalysis)
 def analyze(request: AnalyzeRequest):
-    return analyze_concept(request)
-
-@app.post("/visualize", response_model=VisualizationData)
-def visualize(request: AnalyzeRequest):
     analysis = analyze_concept(request)
 
-    return create_visualization_data(analysis)
+    visualization = create_visualization_data(analysis)
+
+    return ConceptAnalysis(
+        concept=analysis.concept,
+        domain=analysis.domain,
+        entities=visualization.entities,
+        relationships=visualization.relationships,
+        steps=visualization.steps,
+        visualization_type=visualization.visualization_type,
+    )
